@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import api from "../../services/api";
 import { storage } from "../../services/storage";
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 // time format - 11:55 PM
 const formatTime = (dateStr: string) => {
@@ -16,7 +17,6 @@ const formatTime = (dateStr: string) => {
   return `${hours}:${mins} ${ampm}`;
 };
 
-// last seen text
 const getLastSeenText = (user: any) => {
   if (user?.isOnline) return "Online";
   if (!user?.lastSeen) return "Offline";
@@ -38,6 +38,9 @@ export default function ChatScreen() {
   const [otherUser, setOtherUser] = useState<any>({ username: name, isOnline: false });
   const [meId, setMeId] = useState("");
   const flatListRef = useRef<FlatList>(null);
+  
+  // 👇 YE LINE ADD KI - ISKO YAHAN DALO
+  const insets = useSafeAreaInsets();
 
   const load = async () => {
     try {
@@ -45,10 +48,8 @@ export default function ChatScreen() {
       const me = meData ? JSON.parse(meData) : {};
       const myId = String(me._id || me.id || "");
       setMeId(myId);
-
       const res = await api.get(`/messages/${id}`);
       setMessages(res.data || []);
-
       const userRes = await api.get(`/users`);
       const users = userRes.data.users || userRes.data || [];
       const found = users.find((u: any) => String(u._id) === String(id));
@@ -60,7 +61,7 @@ export default function ChatScreen() {
 
   useEffect(() => {
     load();
-    const interval = setInterval(load, 3000); // live online + messages
+    const interval = setInterval(load, 3000);
     return () => clearInterval(interval);
   }, [id]);
 
@@ -68,7 +69,6 @@ export default function ChatScreen() {
     if (!text.trim()) return;
     const msgText = text;
     setText("");
-    // optimistic
     setMessages((prev: any) => [...prev, { _id: Date.now().toString(), text: msgText, sender: meId, createdAt: new Date().toISOString(), isMe: true }]);
     try {
       await api.post("/messages", { receiverId: id, text: msgText });
@@ -79,8 +79,8 @@ export default function ChatScreen() {
     <View style={{ flex: 1, backgroundColor: "#000000" }}>
       <StatusBar barStyle="light-content" />
       
-      {/* HEADER - Online / last seen */}
-      <View style={{ paddingTop: 45, paddingBottom: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", backgroundColor: "#000", borderBottomWidth: 0.5, borderBottomColor: "#1A1A1A" }}>
+      {/* HEADER - ab insets.top use karega */}
+      <View style={{ paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", backgroundColor: "#000", borderBottomWidth: 0.5, borderBottomColor: "#1A1A1A" }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
           <Text style={{ color: "white", fontSize: 26 }}>←</Text>
         </TouchableOpacity>
@@ -95,7 +95,6 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      {/* MESSAGES - Left grey / Right purple + Time */}
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -125,9 +124,19 @@ export default function ChatScreen() {
         }}
       />
 
-      {/* INPUT */}
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, backgroundColor: "#000" }}>
+      {/* INPUT - YE MAIN FIX HAI */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        <View style={{ 
+          flexDirection: "row", 
+          alignItems: "center", 
+          paddingHorizontal: 12, 
+          paddingTop: 8,
+          paddingBottom: insets.bottom + 8, // 👈 YE LINE SABSE IMPORTANT HAI
+          backgroundColor: "#000" 
+        }}>
           <View style={{ flex: 1, backgroundColor: "#1C1C1E", borderRadius: 22, paddingHorizontal: 16, height: 44, justifyContent: "center" }}>
             <TextInput
               value={text}
