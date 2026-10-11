@@ -5,7 +5,6 @@ import api from "../../services/api";
 import { storage } from "../../services/storage";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-// time format - 11:55 PM
 const formatTime = (dateStr: string) => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -38,8 +37,6 @@ export default function ChatScreen() {
   const [otherUser, setOtherUser] = useState<any>({ username: name, isOnline: false });
   const [meId, setMeId] = useState("");
   const flatListRef = useRef<FlatList>(null);
-  
-  // 👇 YE LINE ADD KI - ISKO YAHAN DALO
   const insets = useSafeAreaInsets();
 
   const load = async () => {
@@ -76,10 +73,10 @@ export default function ChatScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000000" }}>
-      <StatusBar barStyle="light-content" />
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      <StatusBar barStyle="light-content" backgroundColor="#000" />
       
-      {/* HEADER - ab insets.top use karega */}
+      {/* HEADER */}
       <View style={{ paddingTop: insets.top + 8, paddingBottom: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", backgroundColor: "#000", borderBottomWidth: 0.5, borderBottomColor: "#1A1A1A" }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
           <Text style={{ color: "white", fontSize: 26 }}>←</Text>
@@ -95,47 +92,52 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item: any) => item._id || String(Math.random())}
-        contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        renderItem={({ item }: any) => {
-          const isMe = String(item.sender) === String(meId) || item.isMe || String(item.senderId) === String(meId) || item.sender === "me";
-          return (
-            <View style={{ alignItems: isMe ? "flex-end" : "flex-start", marginVertical: 3 }}>
-              <View style={{ 
-                backgroundColor: isMe ? "#4A2C6B" : "#1C1C1E",
-                paddingHorizontal: 14, 
-                paddingVertical: 8, 
-                borderRadius: 18,
-                borderBottomRightRadius: isMe ? 4 : 18,
-                borderBottomLeftRadius: isMe ? 18 : 4,
-                maxWidth: "78%",
-              }}>
-                <Text style={{ color: isMe ? "#E8D5F2" : "#E5E7EB", fontSize: 15 }}>{item.text || item.message}</Text>
-                <Text style={{ color: isMe ? "#A48BB8" : "#6B7280", fontSize: 10, marginTop: 4, textAlign: "right" }}>
-                  {formatTime(item.createdAt || item.timestamp)}
-                </Text>
-              </View>
-            </View>
-          );
-        }}
-      />
-
-      {/* INPUT - YE MAIN FIX HAI */}
+      {/* ✅ YE SABSE IMPORTANT FIX HAI - POORE CHAT KO WRAP KIYA */}
       <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 60 : 0}
       >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item: any) => item._id || String(Math.random())}
+          contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
+          style={{ flex: 1 }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          renderItem={({ item }: any) => {
+            const isMe = String(item.sender) === String(meId) || item.isMe || String(item.senderId) === String(meId) || item.sender === "me";
+            return (
+              <View style={{ alignItems: isMe ? "flex-end" : "flex-start", marginVertical: 3 }}>
+                <View style={{ 
+                  backgroundColor: isMe ? "#4A2C6B" : "#1C1C1E",
+                  paddingHorizontal: 14, 
+                  paddingVertical: 8, 
+                  borderRadius: 18,
+                  borderBottomRightRadius: isMe ? 4 : 18,
+                  borderBottomLeftRadius: isMe ? 18 : 4,
+                  maxWidth: "78%",
+                }}>
+                  <Text style={{ color: isMe ? "#E8D5F2" : "#E5E7EB", fontSize: 15 }}>{item.text || item.message}</Text>
+                  <Text style={{ color: isMe ? "#A48BB8" : "#6B7280", fontSize: 10, marginTop: 4, textAlign: "right" }}>
+                    {formatTime(item.createdAt || item.timestamp)}
+                  </Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+
+        {/* INPUT - AB KEYBOARD KE UPAR AYEGA */}
         <View style={{ 
           flexDirection: "row", 
           alignItems: "center", 
           paddingHorizontal: 12, 
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 8, // 👈 YE LINE SABSE IMPORTANT HAI
-          backgroundColor: "#000" 
+          paddingTop: 10,
+          paddingBottom: insets.bottom + 10,
+          backgroundColor: "#000",
+          borderTopWidth: 0.5,
+          borderTopColor: "#1A1A1A"
         }}>
           <View style={{ flex: 1, backgroundColor: "#1C1C1E", borderRadius: 22, paddingHorizontal: 16, height: 44, justifyContent: "center" }}>
             <TextInput

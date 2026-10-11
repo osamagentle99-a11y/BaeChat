@@ -7,10 +7,9 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const connectDB = require("./config/db");
-const User = require("./models/User"); // <-- ye add karo
+const User = require("./models/User");
 
 dotenv.config();
-connectDB();
 
 const app = express();
 const server = http.createServer(app);
@@ -33,8 +32,18 @@ app.get("/", (req, res) => {
   res.send("Bae API is running with Socket.io ❤");
 });
 
-// ===== WHATSAPP JESA LAST SEEN LOGIC =====
+// ===== WHATSAPP JESA LAST SEEN LOGIC - FIXED =====
 let onlineUsers = {};
+
+// DB Connect + sabko OFFLINE karo - YEH SABSE IMPORTANT FIX HAI
+connectDB().then(async () => {
+  try {
+    await User.updateMany({}, { isOnline: false, lastSeen: new Date() });
+    console.log("✅ FIXED: All users set to OFFLINE on server restart");
+  } catch (e) {
+    console.log("Error resetting online status:", e);
+  }
+});
 
 io.on("connection", (socket) => {
   console.log("New user connected:", socket.id);
@@ -42,7 +51,6 @@ io.on("connection", (socket) => {
   socket.on("addUser", async (userId) => {
     onlineUsers[userId] = socket.id;
 
-    // ✅ DB me bhi Online karo - yehi tum miss kar rahe thay
     try {
       await User.findByIdAndUpdate(userId, {
         isOnline: true,
@@ -79,7 +87,6 @@ io.on("connection", (socket) => {
       }
     }
 
-    // ✅ DB me bhi Offline + lastSeen update - yehi WhatsApp hai
     if (disconnectedUserId) {
       try {
         await User.findByIdAndUpdate(disconnectedUserId, {

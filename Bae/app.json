@@ -18,6 +18,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "softwareKeyboardLayoutMode": "resize",
+      "edgeToEdgeEnabled": false,
+      "navigationBar": {
+        "visible": "visible"
+      },
       "predictiveBackGestureEnabled": false,
       "package": "com.osamagentle.Bae"
     },
