@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 import { storage } from "./storage";
 
-// Apna backend IP yahan lagao
-const SOCKET_URL = "http://192.168.1.10:5000"; // apna IP
+// ✅ LIVE BACKEND - Ab IP ka chakkar khatam
+const SOCKET_URL = "https://baechat-2n1h.onrender.com";
 
 const socket = io(SOCKET_URL, {
   autoConnect: true,

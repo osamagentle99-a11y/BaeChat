@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-// ⚠️ YAHAN APNA LAPTOP IP DAALO - ipconfig se milega
-export const BASE_URL = "http://192.168.100.140:5000";
+// ✅ LIVE BACKEND - Ab IP ka chakkar khatam
+export const BASE_URL = "https://baechat-2n1h.onrender.com";
 
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
