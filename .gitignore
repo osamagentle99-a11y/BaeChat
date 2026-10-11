@@ -4,3 +4,4 @@ dist/
 .env 
 Bae/.expo/ 
 Bae/node_modules/ 
+Bae/server/.env 
